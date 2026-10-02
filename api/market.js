@@ -21,7 +21,9 @@ module.exports = async function handler(req, res) {
     }
     var symbol=req.query&&req.query.symbol?req.query.symbol:'NIFTY';
     if(action==='chart') {
-      var cr=await fetch(endpoint('/time_series',{symbol:symbol,interval:'1min',outputsize:'90'}));
+      var tf=req.query&&req.query.tf?req.query.tf:'1D',interval='1min',outputsize=240;
+      if(tf==='1W'){interval='15min';outputsize=160} else if(tf==='1M'){interval='1h';outputsize=180} else if(tf==='3M'){interval='1day';outputsize=90} else if(tf==='6M'){interval='1day';outputsize=180} else if(tf==='1Y'){interval='1day';outputsize=260} else if(tf==='5Y'){interval='1week';outputsize=260}
+      var cr=await fetch(endpoint('/time_series',{symbol:symbol,interval:interval,outputsize:outputsize}));
       if(!cr.ok) throw new Error('chart');
       return res.status(200).json({live:true,mode:'live',data:await cr.json(),updatedAt:new Date().toISOString()});
     }
